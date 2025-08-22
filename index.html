@@ -6,20 +6,34 @@
     <title>Targeted Gif Loader</title>
   </head>
   <body>
+    <div id="loading" style="display: none">Loading...</div>
+    <button>New Image</button>
     <img src="#" alt="cat" />
     <script>
-      const img = document.querySelector("img");
-      // note: pushing the API key to the frontend is not good practice, this is a free key so it is being ignored in this instance for the sake of this practice project
-      fetch(
-        "https://api.giphy.com/v1/gifs/translate?api_key=leTLkxYZKYXmFP1ULB6qxt9pVnzU3Llq&s=cats",
-        { mode: "cors" }
-      )
-        .then(function (response) {
-          return response.json();
-        })
-        .then(function (response) {
-          img.src = response.data.images.original.url;
-        });
+      function apiFetch() {
+        const img = document.querySelector("img");
+        const loading = document.querySelector("#loading");
+        loading.style.display = "block";
+        // note: pushing the API key to the frontend is not good practice, this is a free key so it is being ignored in this instance for the sake of this practice project
+        fetch(
+          "https://api.giphy.com/v1/gifs/translate?api_key=leTLkxYZKYXmFP1ULB6qxt9pVnzU3Llq&s=cats",
+          { mode: "cors" }
+        )
+          .then(function (response) {
+            return response.json();
+          })
+          .then(function (response) {
+            img.onload = function () {
+              loading.style.display = "none";
+            };
+            img.src = response.data.images.original.url;
+          });
+      }
+
+      const btn = document.querySelector("button");
+      btn.addEventListener("click", apiFetch);
+
+      apiFetch();
     </script>
   </body>
 </html>
