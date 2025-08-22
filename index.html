@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Targeted Gif Loader</title>
+  </head>
+  <body>
+    <img src="#" alt="cat" />
+    <script>
+      const img = document.querySelector("img");
+      // note: pushing the API key to the frontend is not good practice, this is a free key so it is being ignored in this instance for the sake of this practice project
+      fetch(
+        "https://api.giphy.com/v1/gifs/translate?api_key=leTLkxYZKYXmFP1ULB6qxt9pVnzU3Llq&s=cats",
+        { mode: "cors" }
+      )
+        .then(function (response) {
+          return response.json();
+        })
+        .then(function (response) {
+          img.src = response.data.images.original.url;
+        });
+    </script>
+  </body>
+</html>
