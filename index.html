@@ -5,34 +5,84 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Targeted Gif Loader</title>
   </head>
+
   <body>
-    <div id="loading" style="display: none">Loading...</div>
-    <button>New Image</button>
-    <img src="#" alt="cat" />
+    <div id="loading" style="display: none; text-align: center">Loading...</div>
+    <form action="" style="text-align: center">
+      <input
+        type="text"
+        id="search"
+        name="search"
+        placeholder="Enter a search word or phrase"
+      />
+      <input type="submit" value="Search" />
+    </form>
+    <img src="#" alt="cat" style="display: block; margin: auto" />
+    <button style="display: block; margin: auto">Alternate Image</button>
+
     <script>
-      function apiFetch() {
+      function apiFetch(searchTerm) {
         const img = document.querySelector("img");
         const loading = document.querySelector("#loading");
+        const query = searchTerm ? encodeURIComponent(searchTerm) : "cats";
         loading.style.display = "block";
         // note: pushing the API key to the frontend is not good practice, this is a free key so it is being ignored in this instance for the sake of this practice project
         fetch(
-          "https://api.giphy.com/v1/gifs/translate?api_key=leTLkxYZKYXmFP1ULB6qxt9pVnzU3Llq&s=cats",
+          `https://api.giphy.com/v1/gifs/translate?api_key=leTLkxYZKYXmFP1ULB6qxt9pVnzU3Llq&s=${query}`,
           { mode: "cors" }
         )
           .then(function (response) {
             return response.json();
           })
           .then(function (response) {
+            if (response.meta && response.meta.status !== 200) {
+              // API returned an error
+              img.style.display = "none";
+              loading.innerHTML = `Oops! An error has occurred: <br>${
+                response.meta.msg || "Unknown error."
+              }<br>Sorry, try again in an hour.`;
+              return;
+            }
+            if (
+              !response.data ||
+              !response.data.images ||
+              !response.data.images.original
+            ) {
+              img.style.display = "none";
+              loading.innerHTML = `Oops! No image found for that search.<br>Try something else.`;
+              return;
+            }
+            // API found and returned a gif
             img.onload = function () {
+              // hide the loading div
               loading.style.display = "none";
             };
+            img.style.display = "block";
             img.src = response.data.images.original.url;
+          })
+          // handle alt errors such as network failure, JS errors in fetch or .then, CORS errors
+          .catch(function (err) {
+            img.style.display = "none";
+            loading.innerHTML = `Oops! A network error has occurred:<br>${err}`;
           });
       }
 
-      const btn = document.querySelector("button");
-      btn.addEventListener("click", apiFetch);
+      // handle form submit for search
+      document.querySelector("form").addEventListener("submit", function (e) {
+        e.preventDefault();
+        const searchValue = document.querySelector("#search").value;
+        apiFetch(searchValue);
+      });
 
+      // alternate image button logic
+      const btn = document.querySelector("button");
+      btn.addEventListener("click", function (e) {
+        e.preventDefault();
+        const searchValue = document.querySelector("#search").value;
+        apiFetch(searchValue);
+      });
+
+      // initial call on launch
       apiFetch();
     </script>
   </body>
